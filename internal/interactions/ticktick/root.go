@@ -97,6 +97,9 @@ func (c *ClientImpl) GetProjects(ctx context.Context) ([]Project, error) {
 	projects, err := sendAPIRequest[[]Project](
 		ctx, c, http.MethodGet, "v2/projects", nil, nil,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	return *projects, err
 }
@@ -105,6 +108,9 @@ func (c *ClientImpl) GetCompletedTasks(ctx context.Context) ([]Task, error) {
 	tasks, err := sendAPIRequest[[]Task](
 		ctx, c, http.MethodGet, "v2/project/all/completed", nil, nil,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	return *tasks, err
 }
