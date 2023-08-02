@@ -12,10 +12,10 @@ const (
 	NeedtimeTag = "needtime"
 )
 
-func NeedtimeTagClean(ctx context.Context, repo *core.Repository) error {
+func NeedtimeTagClean(ctx context.Context, repo *core.Repository) (int, error) {
 	tasks, err := repo.Clients.TickTick.GetCompletedTasks(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	tasksToUpdate := make([]ticktick.Task, 0)
@@ -35,7 +35,7 @@ func NeedtimeTagClean(ctx context.Context, repo *core.Repository) error {
 		}
 	}
 
-	return repo.Clients.TickTick.UpdateTasks(ctx, ticktick.UpdateTaskRequest{
+	return len(tasksToUpdate), repo.Clients.TickTick.UpdateTasks(ctx, ticktick.UpdateTaskRequest{
 		Update: tasksToUpdate,
 	})
 }

@@ -41,7 +41,7 @@ func NewClient(options ...Option) *ClientImpl {
 }
 
 func sendAPIRequest[OutputType any](
-	ctx context.Context, client *ClientImpl, method string, path string, body any,
+	ctx context.Context, client *ClientImpl, method string, path string, query map[string]string, body any,
 ) (*OutputType, error) {
 	var bodyReader io.Reader
 
@@ -60,6 +60,12 @@ func sendAPIRequest[OutputType any](
 	if err != nil {
 		return nil, err
 	}
+
+	q := request.URL.Query()
+	for key, val := range query {
+		q.Add(key, val)
+	}
+	request.URL.RawQuery = q.Encode()
 
 	if bodyReader != nil {
 		request.Header.Add("Content-Type", "application/json")
@@ -88,19 +94,25 @@ func sendAPIRequest[OutputType any](
 }
 
 func (c *ClientImpl) GetProjects(ctx context.Context) ([]Project, error) {
-	projects, err := sendAPIRequest[[]Project](ctx, c, http.MethodGet, "v2/projects", nil)
+	projects, err := sendAPIRequest[[]Project](
+		ctx, c, http.MethodGet, "v2/projects", nil, nil,
+	)
 
 	return *projects, err
 }
 
 func (c *ClientImpl) GetCompletedTasks(ctx context.Context) ([]Task, error) {
-	tasks, err := sendAPIRequest[[]Task](ctx, c, http.MethodGet, "v2/project/all/completed", nil)
+	tasks, err := sendAPIRequest[[]Task](
+		ctx, c, http.MethodGet, "v2/project/all/completed", nil, nil,
+	)
 
 	return *tasks, err
 }
 
 func (c *ClientImpl) UpdateTasks(ctx context.Context, updateRequest UpdateTaskRequest) error {
-	_, err := sendAPIRequest[any](ctx, c, http.MethodPost, "v2/batch/task", updateRequest)
+	_, err := sendAPIRequest[any](
+		ctx, c, http.MethodPost, "v2/batch/task", map[string]string{"limit": "100"}, updateRequest,
+	)
 
 	return err
 }
