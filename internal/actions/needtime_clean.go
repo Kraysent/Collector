@@ -2,11 +2,14 @@ package actions
 
 import (
 	"context"
-	"fmt"
 
 	"collector/internal/core"
 	"collector/internal/interactions/ticktick"
 	"golang.org/x/exp/slices"
+)
+
+const (
+	NeedtimeTag = "needtime"
 )
 
 func NeedtimeTagClean(ctx context.Context, repo *core.Repository) error {
@@ -15,15 +18,24 @@ func NeedtimeTagClean(ctx context.Context, repo *core.Repository) error {
 		return err
 	}
 
-	eventTasks := make([]ticktick.Task, 0)
+	tasksToUpdate := make([]ticktick.Task, 0)
 
 	for _, task := range tasks {
-		if slices.Contains(task.Tags, "event") {
-			eventTasks = append(eventTasks, task)
+		if slices.Contains(task.Tags, NeedtimeTag) {
+			tags := make([]string, 0)
+
+			for _, tag := range task.Tags {
+				if tag != NeedtimeTag {
+					tags = append(tags, tag)
+				}
+			}
+
+			task.Tags = tags
+			tasksToUpdate = append(tasksToUpdate, task)
 		}
 	}
 
-	fmt.Println(eventTasks)
-
-	return nil
+	return repo.Clients.TickTick.UpdateTasks(ctx, ticktick.UpdateTaskRequest{
+		Update: tasksToUpdate,
+	})
 }
