@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"os"
 	"time"
 
 	"collector/internal/actions"
@@ -15,16 +14,11 @@ import (
 
 func main() {
 	ctx := context.Background()
-	ticktickToken, ok := os.LookupEnv("TICKTICK_TOKEN")
-	if !ok {
-		panic("no TickTick token provided")
-	}
 
 	config, err := core.ParseConfig("configs/config.yaml")
 	if err != nil {
 		panic(err)
 	}
-	config.Clients.TickTick.Token = ticktickToken
 
 	repo, err := core.NewRepository(config)
 	if err != nil {
@@ -40,6 +34,9 @@ func main() {
 	done := make(chan error)
 
 	go func() {
+		if repo.Config.TagCleaner.Disabled {
+			return
+		}
 		for {
 			log.Info("Running tag cleaner",
 				zap.String("tag_name", repo.Config.TagCleaner.TagName),
@@ -57,6 +54,17 @@ func main() {
 				zap.Time("next_clean_time", time.Now().Add(repo.Config.TagCleaner.Period)),
 			)
 			time.Sleep(repo.Config.TagCleaner.Period)
+		}
+	}()
+	go func() {
+		if repo.Config.DurationChecker.Disabled {
+			return
+		}
+		for {
+			if err := actions.ReadCodeDurations(ctx, repo); err != nil {
+				panic(err)
+			}
+			time.Sleep(repo.Config.DurationChecker.Period)
 		}
 	}()
 	go func() {

@@ -2,3 +2,5 @@ tag_cleaner:
   tag_name: needtime
   limit: 100
   period: 1m
+duration_checker:
+  period: 1m

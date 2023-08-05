@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -9,12 +10,20 @@ import (
 
 type Config struct {
 	TagCleaner struct {
-		TagName string        `yaml:"tag_name"`
-		Limit   int           `yaml:"limit"`
-		Period  time.Duration `yaml:"period"`
+		Disabled bool          `yaml:"disabled"`
+		TagName  string        `yaml:"tag_name"`
+		Limit    int           `yaml:"limit"`
+		Period   time.Duration `yaml:"period"`
 	} `yaml:"tag_cleaner"`
+	DurationChecker struct {
+		Disabled bool          `yaml:"disabled"`
+		Period   time.Duration `yaml:"period"`
+	} `yaml:"duration_checker"`
 	Clients struct {
 		TickTick struct {
+			Token string `yaml:"-"`
+		}
+		WakaTime struct {
 			Token string `yaml:"-"`
 		}
 	}
@@ -31,6 +40,18 @@ func ParseConfig(filename string) (*Config, error) {
 	if err := yaml.Unmarshal(file, &config); err != nil {
 		return nil, err
 	}
+
+	ticktickToken, ok := os.LookupEnv("TICKTICK_TOKEN")
+	if !ok {
+		return nil, fmt.Errorf("no TickTick token provided")
+	}
+	config.Clients.TickTick.Token = ticktickToken
+
+	wakatimeToken, ok := os.LookupEnv("WAKATIME_TOKEN")
+	if !ok {
+		return nil, fmt.Errorf("no WakaTime token provided")
+	}
+	config.Clients.WakaTime.Token = wakatimeToken
 
 	return &config, nil
 }
