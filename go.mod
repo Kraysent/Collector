@@ -6,6 +6,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	go.uber.org/zap v1.25.0
 	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -16,6 +17,7 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
+	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect

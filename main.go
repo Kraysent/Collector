@@ -14,7 +14,12 @@ import (
 
 func main() {
 	ctx := context.Background()
-	repo, err := core.NewRepository()
+	config, err := core.ParseConfig("configs/config.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	repo, err := core.NewRepository(config)
 	if err != nil {
 		panic(err)
 	}
@@ -25,20 +30,26 @@ func main() {
 	}
 
 	log.SetLogger(*logger)
-
 	done := make(chan error)
 
 	go func() {
 		for {
-			log.Info("Running needtime cleaner on last 100 completed tasks")
-			n, err := actions.NeedtimeTagClean(ctx, repo)
+			log.Info("Running tag cleaner",
+				zap.String("tag_name", repo.Config.TagCleaner.TagName),
+				zap.Int("limit", repo.Config.TagCleaner.Limit),
+			)
+			n, err := actions.CleanTagFromCompletedTasks(ctx, repo)
 			if err != nil {
 				done <- err
 				return
 			}
 
-			log.Info("Done, cleaned 'needtime' tag from tasks", zap.Int("number_of_tasks", n))
-			time.Sleep(1 * time.Minute)
+			log.Info("Done, cleaned tag from tasks",
+				zap.String("tag_name", repo.Config.TagCleaner.TagName),
+				zap.Int("number_of_affected_tasks", n),
+				zap.Time("next_clean_time", time.Now().Add(repo.Config.TagCleaner.Period)),
+			)
+			time.Sleep(repo.Config.TagCleaner.Period)
 		}
 	}()
 	go func() {

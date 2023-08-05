@@ -8,12 +8,13 @@ import (
 
 type Repository struct {
 	Clients *interactions.Clients
+	Config  *Config
 	Metrics struct {
-		NeedtimeCleanDuration prometheus.Gauge
+		TagCleanDuration prometheus.Gauge
 	}
 }
 
-func NewRepository() (*Repository, error) {
+func NewRepository(config *Config) (*Repository, error) {
 	clients, err := interactions.NewClients()
 	if err != nil {
 		return nil, err
@@ -21,11 +22,12 @@ func NewRepository() (*Repository, error) {
 
 	repo := &Repository{
 		Clients: clients,
+		Config:  config,
 	}
 
-	repo.Metrics.NeedtimeCleanDuration = promauto.NewGauge(
+	repo.Metrics.TagCleanDuration = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "needtime_clean_duration",
+			Name: "tag_clean_duration",
 			Help: "Duration of the cleaning needtime tag process",
 		},
 	)

@@ -9,15 +9,11 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-const (
-	NeedtimeTag = "needtime"
-)
-
-func NeedtimeTagClean(ctx context.Context, repo *core.Repository) (int, error) {
+func CleanTagFromCompletedTasks(ctx context.Context, repo *core.Repository) (int, error) {
 	start := time.Now()
 	defer func() {
 		end := time.Since(start)
-		repo.Metrics.NeedtimeCleanDuration.Set(float64(end.Milliseconds()))
+		repo.Metrics.TagCleanDuration.Set(float64(end.Milliseconds()))
 	}()
 
 	tasks, err := repo.Clients.TickTick.GetCompletedTasks(ctx)
@@ -28,11 +24,11 @@ func NeedtimeTagClean(ctx context.Context, repo *core.Repository) (int, error) {
 	tasksToUpdate := make([]ticktick.Task, 0)
 
 	for _, task := range tasks {
-		if slices.Contains(task.Tags, NeedtimeTag) {
+		if slices.Contains(task.Tags, repo.Config.TagCleaner.TagName) {
 			tags := make([]string, 0)
 
 			for _, tag := range task.Tags {
-				if tag != NeedtimeTag {
+				if tag != repo.Config.TagCleaner.TagName {
 					tags = append(tags, tag)
 				}
 			}
@@ -44,5 +40,5 @@ func NeedtimeTagClean(ctx context.Context, repo *core.Repository) (int, error) {
 
 	return len(tasksToUpdate), repo.Clients.TickTick.UpdateTasks(ctx, ticktick.UpdateTaskRequest{
 		Update: tasksToUpdate,
-	})
+	}, repo.Config.TagCleaner.Limit)
 }

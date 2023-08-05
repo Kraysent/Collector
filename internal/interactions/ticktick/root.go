@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"collector/internal/log"
@@ -19,7 +20,7 @@ const (
 type Client interface {
 	GetProjects(context.Context) ([]Project, error)
 	GetCompletedTasks(context.Context) ([]Task, error)
-	UpdateTasks(context.Context, UpdateTaskRequest) error
+	UpdateTasks(context.Context, UpdateTaskRequest, int) error
 }
 
 var _ Client = (*ClientImpl)(nil)
@@ -112,7 +113,7 @@ func (c *ClientImpl) GetProjects(ctx context.Context) ([]Project, error) {
 		return nil, err
 	}
 
-	return *projects, err
+	return *projects, nil
 }
 
 func (c *ClientImpl) GetCompletedTasks(ctx context.Context) ([]Task, error) {
@@ -123,12 +124,14 @@ func (c *ClientImpl) GetCompletedTasks(ctx context.Context) ([]Task, error) {
 		return nil, err
 	}
 
-	return *tasks, err
+	return *tasks, nil
 }
 
-func (c *ClientImpl) UpdateTasks(ctx context.Context, updateRequest UpdateTaskRequest) error {
+func (c *ClientImpl) UpdateTasks(ctx context.Context, updateRequest UpdateTaskRequest, limit int) error {
 	_, err := sendAPIRequest[any](
-		ctx, c, http.MethodPost, "v2/batch/task", map[string]string{"limit": "100"}, updateRequest,
+		ctx, c, http.MethodPost, "v2/batch/task", map[string]string{
+			"limit": strconv.Itoa(limit),
+		}, updateRequest,
 	)
 
 	return err
