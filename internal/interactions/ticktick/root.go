@@ -7,6 +7,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"collector/internal/log"
+	"go.uber.org/zap"
 )
 
 const (
@@ -54,8 +57,10 @@ func sendAPIRequest[OutputType any](
 		bodyReader = bytes.NewReader(bodyBytes)
 	}
 
+	target := strings.Join([]string{client.endpoint, path}, "/")
+
 	request, err := http.NewRequestWithContext(
-		ctx, method, strings.Join([]string{client.endpoint, path}, "/"), bodyReader,
+		ctx, method, target, bodyReader,
 	)
 	if err != nil {
 		return nil, err
@@ -75,6 +80,10 @@ func sendAPIRequest[OutputType any](
 		Name: "t", Value: client.token,
 	})
 
+	log.Debug("Sending request",
+		zap.String("target", target), zap.String("method", method), zap.Any("query", query),
+	)
+
 	response, err := client.client.Do(request)
 	if err != nil {
 		return nil, err
@@ -84,6 +93,8 @@ func sendAPIRequest[OutputType any](
 	if err != nil {
 		return nil, err
 	}
+
+	log.Debug("Got response", zap.ByteString("response_body", responseBytes))
 
 	var result OutputType
 	if err := json.Unmarshal(responseBytes, &result); err != nil {

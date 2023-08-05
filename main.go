@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
 	"collector/internal/actions"
 	"collector/internal/core"
+	"collector/internal/log"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -18,18 +19,25 @@ func main() {
 		panic(err)
 	}
 
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+
+	log.SetLogger(*logger)
+
 	done := make(chan error)
 
 	go func() {
 		for {
-			fmt.Println("Running needtime cleaner on last 100 completed tasks")
+			log.Info("Running needtime cleaner on last 100 completed tasks")
 			n, err := actions.NeedtimeTagClean(ctx, repo)
 			if err != nil {
 				done <- err
 				return
 			}
 
-			fmt.Printf("Done, cleaned 'needtime' tag from %d tasks\n", n)
+			log.Info("Done, cleaned 'needtime' tag from tasks", zap.Int("number_of_tasks", n))
 			time.Sleep(1 * time.Minute)
 		}
 	}()
