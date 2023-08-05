@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"time"
 
 	"collector/internal/core"
 	"collector/internal/interactions/ticktick"
@@ -13,6 +14,12 @@ const (
 )
 
 func NeedtimeTagClean(ctx context.Context, repo *core.Repository) (int, error) {
+	start := time.Now()
+	defer func() {
+		end := time.Since(start)
+		repo.Metrics.NeedtimeCleanDuration.Set(float64(end.Milliseconds()))
+	}()
+
 	tasks, err := repo.Clients.TickTick.GetCompletedTasks(ctx)
 	if err != nil {
 		return 0, err
