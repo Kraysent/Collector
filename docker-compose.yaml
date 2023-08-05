@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: "collectordb"
+      POSTGRES_USER: "collector"
+      POSTGRES_PASSWORD: "password"
+    volumes:
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"

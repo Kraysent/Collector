@@ -13,6 +13,11 @@ type Config struct {
 		Limit   int           `yaml:"limit"`
 		Period  time.Duration `yaml:"period"`
 	} `yaml:"tag_cleaner"`
+	Clients struct {
+		TickTick struct {
+			Token string `yaml:"-"`
+		}
+	}
 }
 
 func ParseConfig(filename string) (*Config, error) {

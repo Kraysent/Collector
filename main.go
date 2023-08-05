@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	"collector/internal/actions"
@@ -14,10 +15,16 @@ import (
 
 func main() {
 	ctx := context.Background()
+	ticktickToken, ok := os.LookupEnv("TICKTICK_TOKEN")
+	if !ok {
+		panic("no TickTick token provided")
+	}
+
 	config, err := core.ParseConfig("configs/config.yaml")
 	if err != nil {
 		panic(err)
 	}
+	config.Clients.TickTick.Token = ticktickToken
 
 	repo, err := core.NewRepository(config)
 	if err != nil {

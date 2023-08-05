@@ -16,7 +16,7 @@ type Repository struct {
 }
 
 func NewRepository(config *Config) (*Repository, error) {
-	clients, err := interactions.NewClients()
+	clients, err := interactions.NewClients(config.Clients.TickTick.Token)
 	if err != nil {
 		return nil, err
 	}
