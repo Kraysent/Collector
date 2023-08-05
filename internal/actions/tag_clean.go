@@ -11,17 +11,18 @@ import (
 
 func CleanTagFromCompletedTasks(ctx context.Context, repo *core.Repository) (int, error) {
 	start := time.Now()
+	tasksToUpdate := make([]ticktick.Task, 0)
+
 	defer func() {
 		end := time.Since(start)
 		repo.Metrics.TagCleanDuration.Set(float64(end.Milliseconds()))
+		repo.Metrics.CleanedTasksNumber.Add(float64(len(tasksToUpdate)))
 	}()
 
 	tasks, err := repo.Clients.TickTick.GetCompletedTasks(ctx)
 	if err != nil {
 		return 0, err
 	}
-
-	tasksToUpdate := make([]ticktick.Task, 0)
 
 	for _, task := range tasks {
 		if slices.Contains(task.Tags, repo.Config.TagCleaner.TagName) {

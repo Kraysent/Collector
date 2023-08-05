@@ -10,7 +10,8 @@ type Repository struct {
 	Clients *interactions.Clients
 	Config  *Config
 	Metrics struct {
-		TagCleanDuration prometheus.Gauge
+		TagCleanDuration   prometheus.Gauge
+		CleanedTasksNumber prometheus.Counter
 	}
 }
 
@@ -29,6 +30,12 @@ func NewRepository(config *Config) (*Repository, error) {
 		prometheus.GaugeOpts{
 			Name: "tag_clean_duration",
 			Help: "Duration of the cleaning needtime tag process",
+		},
+	)
+	repo.Metrics.CleanedTasksNumber = promauto.NewCounter(
+		prometheus.CounterOpts{
+			Name: "number_of_cleaned_tasks",
+			Help: "Number tasks which had their tags cleaned",
 		},
 	)
 
