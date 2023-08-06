@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"collector/internal/storage"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,6 +28,7 @@ type Config struct {
 			Token string `yaml:"-"`
 		}
 	}
+	Storage storage.Config `yaml:"storage"`
 }
 
 func ParseConfig(filename string) (*Config, error) {

@@ -6,6 +6,7 @@ import (
 
 	"collector/internal/core"
 	"collector/internal/log"
+	"collector/internal/storage"
 	"go.uber.org/zap"
 )
 
@@ -16,7 +17,17 @@ func ReadCodeDurations(ctx context.Context, repo *core.Repository) error {
 		return err
 	}
 
+	events := make([]storage.Event, 0)
+
 	for _, dur := range durations {
+		events = append(events, storage.Event{
+			Timestamp: time.Unix(int64(dur.Timestamp), 0),
+			Source:    "wakatime",
+			Data: map[string]any{
+				"project":  dur.Project,
+				"duration": dur.Duration,
+			},
+		})
 		log.Info("Read duration",
 			zap.Time("timestamp", time.Unix(int64(dur.Timestamp), 0)),
 			zap.String("project", dur.Project),
@@ -24,5 +35,5 @@ func ReadCodeDurations(ctx context.Context, repo *core.Repository) error {
 		)
 	}
 
-	return nil
+	return repo.Storage.EventStorage.InsertEvents(ctx, events)
 }

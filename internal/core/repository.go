@@ -2,12 +2,16 @@ package core
 
 import (
 	"collector/internal/interactions"
+	"collector/internal/storage"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 type Repository struct {
 	Clients *interactions.Clients
+	Storage struct {
+		EventStorage storage.EventStorage
+	}
 	Config  *Config
 	Metrics struct {
 		TagCleanDuration   prometheus.Gauge
@@ -25,6 +29,12 @@ func NewRepository(config *Config) (*Repository, error) {
 		Clients: clients,
 		Config:  config,
 	}
+
+	eventStorage, err := storage.NewStorage(config.Storage)
+	if err != nil {
+		return nil, err
+	}
+	repo.Storage.EventStorage = eventStorage
 
 	repo.Metrics.TagCleanDuration = promauto.NewGauge(
 		prometheus.GaugeOpts{

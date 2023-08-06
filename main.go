@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	"collector/internal/actions"
@@ -15,7 +16,12 @@ import (
 func main() {
 	ctx := context.Background()
 
-	config, err := core.ParseConfig("configs/config.yaml")
+	configPath, ok := os.LookupEnv("CONFIG")
+	if !ok {
+		panic("no config specified")
+	}
+
+	config, err := core.ParseConfig(configPath)
 	if err != nil {
 		panic(err)
 	}
