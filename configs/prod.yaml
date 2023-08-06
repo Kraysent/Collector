@@ -8,7 +8,8 @@ duration_checker:
 
 storage:
   db: collectordb
-  user: collector
+  user: kraysent
   password_env: DB_PASSWORD
-  host: localhost
-  port: 5432
+  host: c-c9qlr6969sqkt9j1du0f.rw.mdb.yandexcloud.net
+  port: 6432
+  sslmode: require

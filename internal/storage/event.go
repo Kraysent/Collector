@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"os"
 
+	"collector/internal/log"
 	"github.com/Masterminds/squirrel"
+	"go.uber.org/zap"
 )
 
 const (
@@ -75,6 +77,8 @@ func (s *EventStorageImpl) InsertEvents(ctx context.Context, events []Event) (er
 		if err != nil {
 			return err
 		}
+
+		log.Debug("running query", zap.String("query", query), zap.Any("args", args))
 
 		rows, err := tx.Query(query, args...)
 		if err != nil {

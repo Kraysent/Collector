@@ -5,9 +5,7 @@ import (
 	"time"
 
 	"collector/internal/core"
-	"collector/internal/log"
 	"collector/internal/storage"
-	"go.uber.org/zap"
 )
 
 func ReadCodeDurations(ctx context.Context, repo *core.Repository) error {
@@ -28,11 +26,6 @@ func ReadCodeDurations(ctx context.Context, repo *core.Repository) error {
 				"duration": dur.Duration,
 			},
 		})
-		log.Info("Read duration",
-			zap.Time("timestamp", time.Unix(int64(dur.Timestamp), 0)),
-			zap.String("project", dur.Project),
-			zap.Duration("duration", time.Duration(dur.Duration*float64(time.Second))),
-		)
 	}
 
 	return repo.Storage.EventStorage.InsertEvents(ctx, events)

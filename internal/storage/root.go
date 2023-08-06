@@ -14,6 +14,7 @@ type Config struct {
 	Password    string `yaml:"-"`
 	Host        string `yaml:"host"`
 	Port        int    `yaml:"port"`
+	SSLMode     string `yaml:"sslmode"`
 }
 
 type Storage struct {
@@ -23,9 +24,9 @@ type Storage struct {
 
 func (s *Storage) Connect() error {
 	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		s.Config.Host, s.Config.Port, s.Config.User,
-		s.Config.Password, s.Config.DBName,
+		s.Config.Password, s.Config.DBName, s.Config.SSLMode,
 	)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
