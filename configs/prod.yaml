@@ -1,3 +1,7 @@
+logging:
+  stdout_path: "/logs/example.log"
+  stderr_path: "/logs/example_err.log"
+
 tag_cleaner:
   tag_name: needtime
   limit: 100

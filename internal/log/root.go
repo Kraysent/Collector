@@ -4,10 +4,29 @@ import (
 	"go.uber.org/zap"
 )
 
-var globalLogger zap.Logger
+var globalLogger *zap.Logger
 
-func SetLogger(logger zap.Logger) {
+func InitLogger(stdoutPath, stderrPath string) error {
+	config := zap.NewProductionConfig()
+	config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	config.Development = true
+	config.OutputPaths = []string{"stdout"}
+	if stdoutPath != "" {
+		config.OutputPaths = append(config.OutputPaths, stdoutPath)
+	}
+	config.ErrorOutputPaths = []string{"stderr"}
+	if stderrPath != "" {
+		config.ErrorOutputPaths = append(config.ErrorOutputPaths, stderrPath)
+	}
+
+	logger, err := config.Build()
+	if err != nil {
+		return err
+	}
+
 	globalLogger = logger
+
+	return nil
 }
 
 func Debug(msg string, fields ...zap.Field) {

@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  collector:
+    image: cr.yandex/crpgqd2rqkfgjq6c275u/collector:latest
+    network_mode: host
+    environment:
+      - DB_PASSWORD=password
+      - TICKTICK_TOKEN
+      - WAKATIME_TOKEN
+      - CONFIG=./configs/prod.yaml
+    volumes:
+      - ./logs:/logs
+  grafana:
+    image: grafana/agent:latest
+    network_mode: host
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - /etc/agent/config.river
+    environment:
+      - AGENT_MODE=flow
+      - GRAFANA_AGENT_USERNAME
+      - GRAFANA_AGENT_PASSWORD
+    volumes:
+      - ./infra/config.river:/etc/agent/config.river

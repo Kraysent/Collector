@@ -31,12 +31,10 @@ func main() {
 		panic(err)
 	}
 
-	logger, err := zap.NewDevelopment()
-	if err != nil {
+	if err := log.InitLogger(config.Logging.StdoutPath, config.Logging.StderrPath); err != nil {
 		panic(err)
 	}
 
-	log.SetLogger(*logger)
 	done := make(chan error)
 
 	go func() {
