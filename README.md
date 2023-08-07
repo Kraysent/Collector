@@ -9,3 +9,4 @@ It features:
 - small version of WakaTime API client
 - `prometheus` metrics and their sending to Grafana
 - Storage client for PostgreSQL
+- `docker-compose` for collector itself, Grafana Agent and local PostgreSQL DB.
